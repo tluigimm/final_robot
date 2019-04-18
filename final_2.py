@@ -73,13 +73,13 @@ def vetir(x):
 					lista_esquerda.append(x[e])
 
 
-	if min(lista_esquerda) < 0.15:
+	if min(lista_esquerda) < 0.15 and min(lista_esquerda) > 0.12:
 		print("Esquerda:")
 		return "Esquerda"
-	elif min(lista_direita) < 0.15:
+	elif min(lista_direita) < 0.15 and min(lista_direita) > 0.12:
 		print("Direita:")
 		return "Direita"
-	elif min(lista_direita) < 0.15 and min(lista_esquerda) < 0.15:
+	elif min(lista_direita) < 0.15 and min(lista_esquerda) < 0.15 and min(lista_esquerda) > 0.12 and min(lista_direita) > 0.12:
 		print('BOTH')
 		return "Direita"
 	else:
@@ -173,7 +173,7 @@ if __name__=="__main__":
 					print("BATEU NA FRENTEEEEEE")
 					velocidade_saida.publish(Twist(Vector3(0,0,0),Vector3(0,0,0)))
 					rospy.sleep(1)
-					velocidade_saida.publish(Twist(Vector3(-0.3,0,0),Vector3(0,0,0)))
+					velocidade_saida.publish(Twist(Vector3(-0.1,0,0),Vector3(0,0,0)))
 					rospy.sleep(1)
 					velocidade_saida.publish(Twist(Vector3(0,0,0),Vector3(0,0,0.5)))
 					rospy.sleep(1)
@@ -182,7 +182,7 @@ if __name__=="__main__":
 					print("BATEU ATRAAAAAAAAAASSSS")
 					velocidade_saida.publish(Twist(Vector3(0,0,0),Vector3(0,0,0)))
 					rospy.sleep(1)
-					velocidade_saida.publish(Twist(Vector3(0.3,0,0),Vector3(0,0,0)))
+					velocidade_saida.publish(Twist(Vector3(0.1,0,0),Vector3(0,0,0)))
 					rospy.sleep(1)
 					velocidade_saida.publish(Twist(Vector3(0,0,0),Vector3(0,0,0.5)))
 					rospy.sleep(1)
@@ -190,6 +190,12 @@ if __name__=="__main__":
 				oi = 0
 
 			else:
+				# da re durante 3s ao ver um passaro
+				if bird:
+					print("oh nao, um passaro")
+					velocidade_saida.publish(Twist(Vector3(-0.1,0,0),Vector3(0,0,0)))
+					rospy.sleep(3)
+
 				# lazer detecta na direita
 				if lazer == 'Direita':
 					velocidade_saida.publish(Twist(Vector3(0.1,0,0),Vector3(0,0,-0.5)))
@@ -201,36 +207,30 @@ if __name__=="__main__":
 				# lazer não detecta nada
 				elif lazer == 'Normal':
 
-					# da re durante 3s ao ver um passaro
-					if bird:
-						print("oh nao, um passaro")
-						velocidade_saida.publish(Twist(Vector3(-0.3,0,0),Vector3(0,0,0)))
-						rospy.sleep(3)
-
 					# segue vermelho caso não haja passaro
-					if red and not bird:
+					# if red and not bird:
 
-						# vai para frente quando tracking centralizado
-						if centro[0]+dx >= media[0] >= centro[0]-dx:
-							print("CENTRALIZADOOOO")
-							vel = Twist(Vector3(0.3,0,0),Vector3(0,0,0))
+					# vai para frente quando tracking centralizado
+					if centro[0]+dx >= media[0] >= centro[0]-dx:
+						print("CENTRALIZADOOOO")
+						vel = Twist(Vector3(0.1,0,0),Vector3(0,0,0))
 
-						# gira sentido horário e vai para frente quando centro do tracking esta a direita
-						elif media[0] > centro[0]+dx:
-							print("HORARIO")
-							vel = Twist(Vector3(0.1,0,0), Vector3(0,0,0.5))
+					# gira sentido horário e vai para frente quando centro do tracking esta a direita
+					elif media[0] > centro[0]+dx:
+						print("HORARIO")
+						vel = Twist(Vector3(0.1,0,0), Vector3(0,0,0.5))
 
-						# gira sentido anti-horário e vai para frente quando centro do tracking esta a esquerda
-						elif media[0] < centro[0]-dx:
-							print("ANTI-HORARIO")
-							vel = Twist(Vector3(0.1,0,0), Vector3(0,0,-0.5))
+					# gira sentido anti-horário e vai para frente quando centro do tracking esta a esquerda
+					elif media[0] < centro[0]-dx:
+						print("ANTI-HORARIO")
+						vel = Twist(Vector3(0.1,0,0), Vector3(0,0,-0.5))
 
-						# Caso centro do tracking saia da tela, redefine contador como 0 e procura novo tracking
-						else:
-							vel = Twist(Vector3(0,0,0), Vector3(0,0,0.5))
+					# Caso centro do tracking saia da tela, redefine contador como 0 e procura novo tracking
+					else:
+						vel = Twist(Vector3(0,0,0), Vector3(0,0,0.5))
 
-						velocidade_saida.publish(vel)
-						rospy.sleep(0.1)
+					velocidade_saida.publish(vel)
+					rospy.sleep(0.1)
 
 	except rospy.ROSInterruptException:
 	    print("Ocorreu uma exceção com o rospy")
